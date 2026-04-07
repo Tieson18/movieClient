@@ -15,7 +15,7 @@ function initializeClient(): MovieClient {
   );
 
   requestAdapter.baseUrl =
-    "https://movie-catalog-api-fwehcpdmh6bggtak.canadacentral-01.azurewebsites.net/movies";
+    "https://movie-catalog-api-fwehcpdmh6bggtak.canadacentral-01.azurewebsites.net/";
 
   return createMovieClient(requestAdapter);
 }
