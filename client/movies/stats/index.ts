@@ -6,7 +6,7 @@ import {
   type AdditionalDataHolder,
   type BaseRequestBuilder,
   type Parsable,
-  type ParsableFactory,
+  // type ParsableFactory,
   type ParseNode,
   type RequestConfiguration,
   type RequestInformation,
@@ -20,9 +20,10 @@ import {
  * @returns {StatsGetResponse}
  */
 // @ts-ignore
-export function createStatsGetResponseFromDiscriminatorValue(
-  parseNode: ParseNode | undefined,
-): (instance?: Parsable) => Record<string, (node: ParseNode) => void> {
+export function createStatsGetResponseFromDiscriminatorValue(): (
+// parseNode: ParseNode | undefined,
+  instance?: Parsable,
+) => Record<string, (node: ParseNode) => void> {
   return deserializeIntoStatsGetResponse;
 }
 /**
