@@ -4,7 +4,7 @@
 // @ts-ignore
 import {
   createMovieFromDiscriminatorValue,
-  serializeMovie,
+  // serializeMovie,
   serializeMovieUpdate,
   type Movie,
   type MovieUpdate,
@@ -14,7 +14,7 @@ import {
   type AdditionalDataHolder,
   type BaseRequestBuilder,
   type Parsable,
-  type ParsableFactory,
+  // type ParsableFactory,
   type ParseNode,
   type RequestConfiguration,
   type RequestInformation,
@@ -28,9 +28,10 @@ import {
  * @returns {MoviesDeleteResponse}
  */
 // @ts-ignore
-export function createMoviesDeleteResponseFromDiscriminatorValue(
-  parseNode: ParseNode | undefined,
-): (instance?: Parsable) => Record<string, (node: ParseNode) => void> {
+export function createMoviesDeleteResponseFromDiscriminatorValue(): (
+// parseNode: ParseNode | undefined,
+  instance?: Parsable,
+) => Record<string, (node: ParseNode) => void> {
   return deserializeIntoMoviesDeleteResponse;
 }
 /**
