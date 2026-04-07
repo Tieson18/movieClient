@@ -3,8 +3,8 @@ import {
   FetchRequestAdapter,
   HttpClient,
 } from "@microsoft/kiota-http-fetchlibrary";
-import { createMovieClient } from "../../../movie-api/client/MovieClient.js";
-import type { MovieClient } from "../../../movie-api/client/MovieClient.js";
+import { createMovieClient } from "../../client/MovieClient.js";
+import type { MovieClient } from "../../client/MovieClient.js";
 
 function initializeClient(): MovieClient {
   const requestAdapter = new FetchRequestAdapter(
