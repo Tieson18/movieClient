@@ -1,0 +1,161 @@
+openapi: "3.1.0"
+info:
+  title: Movie Catalog API
+  version: "1.0.0"
+  description: API for managing a movie catalog
+  contact:
+    name: Victor
+
+servers:
+  - url: http://localhost:3000
+
+paths:
+  /:
+    get:
+      summary: List all movies
+      operationId: MovieService_list
+      responses:
+        "200":
+          description: Movie list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Movie"
+
+    post:
+      summary: Create movie
+      operationId: MovieService_create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MovieCreate"
+      responses:
+        "201":
+          description: Movie created
+
+  /{id}:
+    get:
+      summary: Get movie
+      operationId: MovieService_get
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Movie returned
+
+    patch:
+      summary: Update movie
+      operationId: MovieService_update
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MovieUpdate"
+      responses:
+        "200":
+          description: Movie updated
+
+    delete:
+      summary: Delete movie
+      operationId: MovieService_delete
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Movie deleted
+
+  /stats:
+    get:
+      summary: Movie statistics
+      operationId: MovieService_stats
+      responses:
+        "200":
+          description: Stats returned
+
+components:
+  parameters:
+    MoviesKey:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+    Movie:
+      type: object
+      required: [title, director, releaseYear, genre, rating]
+      properties:
+        id:
+          type: string
+          readOnly: true
+        title:
+          type: string
+        director:
+          type: string
+        releaseYear:
+          type: integer
+        genre:
+          type: string
+          enum: [Action, Drama, Comedy, Sci-Fi]
+        rating:
+          type: number
+    MovieCreate:
+      type: object
+      required: [title, director, releaseYear, genre, rating]
+      properties:
+        title:
+          type: string
+        director:
+          type: string
+        releaseYear:
+          type: integer
+        genre:
+          type: string
+          enum: [Action, Drama, Comedy, Sci-Fi]
+        rating:
+          type: number
+      description: Create movie model.
+    MovieUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        director:
+          type: string
+        releaseYear:
+          type: integer
+        genre:
+          type: string
+          enum: [Action, Drama, Comedy, Sci-Fi]
+        rating:
+          type: number
+      description: Update movie model.

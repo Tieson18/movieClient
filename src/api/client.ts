@@ -1,0 +1,31 @@
+import { AnonymousAuthenticationProvider } from "@microsoft/kiota-abstractions";
+import {
+  FetchRequestAdapter,
+  HttpClient,
+} from "@microsoft/kiota-http-fetchlibrary";
+import { createMovieClient } from "../../../movie-api/client/MovieClient.js";
+import type { MovieClient } from "../../../movie-api/client/MovieClient.js";
+
+function initializeClient(): MovieClient {
+  const requestAdapter = new FetchRequestAdapter(
+    new AnonymousAuthenticationProvider(),
+    undefined,
+    undefined,
+    new HttpClient(fetch.bind(globalThis)), // ✅ native fetch, bound correctly
+  );
+
+  requestAdapter.baseUrl = "http://localhost:3000";
+
+  return createMovieClient(requestAdapter);
+}
+
+let clientInstance: MovieClient | null = null;
+
+export function getClient(): MovieClient {
+  if (!clientInstance) {
+    clientInstance = initializeClient();
+  }
+  return clientInstance;
+}
+
+export type { MovieClient };
