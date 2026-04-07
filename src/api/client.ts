@@ -14,7 +14,8 @@ function initializeClient(): MovieClient {
     new HttpClient(fetch.bind(globalThis)), // ✅ native fetch, bound correctly
   );
 
-  requestAdapter.baseUrl = "http://localhost:3000";
+  requestAdapter.baseUrl =
+    "https://movie-catalog-api-fwehcpdmh6bggtak.canadacentral-01.azurewebsites.net/";
 
   return createMovieClient(requestAdapter);
 }
