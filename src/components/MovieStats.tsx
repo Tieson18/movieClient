@@ -1,10 +1,3 @@
-/**
- * MovieStats Component (Optimized with React Query)
- * 
- * Displays statistics about the movie collection using GET /movies/stats
- * Uses caching to reduce API calls
- */
-
 import { useMovieStats } from '../hooks/useMovieStats'
 import '../styles/MovieStats.css'
 

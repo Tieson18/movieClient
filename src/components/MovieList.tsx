@@ -36,6 +36,8 @@ export function MovieList({ onMovieDeleted, onMovieEdit }: MovieListProps) {
 
             // 🔥 Refresh cached data
             await queryClient.invalidateQueries({ queryKey: ['movies'] })
+            await queryClient.invalidateQueries({ queryKey: ['movieStats'] })
+            await queryClient.refetchQueries({ queryKey: ['movieStats'] })
 
             onMovieDeleted()
         } catch (err) {
