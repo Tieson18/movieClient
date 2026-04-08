@@ -1,18 +1,20 @@
 /**
- * AddMovieForm Component
+ * AddMovieForm Component (Optimized with React Query)
  * 
  * Form to add a new movie using POST /movies
+ * Uses mutation + cache invalidation for real-time UI updates
  */
 
-import { useState } from 'react';
-import { getClient } from '../api/client';
-import type { Genre, MovieCreate } from '../types';
-import '../styles/AddMovieForm.css';
+import { useState } from 'react'
+import { getClient } from '../api/client'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { Genre, MovieCreate } from '../types'
+import '../styles/AddMovieForm.css'
 
-const GENRES: Genre[] = ['Action', 'Drama', 'Comedy', 'Sci-Fi'];
+const GENRES: Genre[] = ['Action', 'Drama', 'Comedy', 'Sci-Fi']
 
 interface AddMovieFormProps {
-    onMovieAdded: () => void;
+    onMovieAdded: () => void
 }
 
 export function AddMovieForm({ onMovieAdded }: AddMovieFormProps) {
@@ -22,70 +24,76 @@ export function AddMovieForm({ onMovieAdded }: AddMovieFormProps) {
         releaseYear: new Date().getFullYear(),
         genre: 'Drama',
         rating: 7.5,
-    });
+    })
 
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState<string | null>(null)
+    const [success, setSuccess] = useState(false)
+
+    const queryClient = useQueryClient()
+
+    // 🔥 React Query mutation
+    const addMovieMutation = useMutation({
+        mutationFn: async (movie: MovieCreate) => {
+            const client = getClient()
+            return await client.movies.post(movie)
+        },
+        onSuccess: () => {
+            // Refresh cached data
+            queryClient.invalidateQueries({ queryKey: ['movies'] })
+            queryClient.invalidateQueries({ queryKey: ['movieStats'] })
+
+            setSuccess(true)
+
+            // Reset form
+            setFormData({
+                title: '',
+                director: '',
+                releaseYear: new Date().getFullYear(),
+                genre: 'Drama',
+                rating: 7.5,
+            })
+
+            setTimeout(() => setSuccess(false), 3000)
+
+            // Optional (can remove later)
+            onMovieAdded()
+        },
+        onError: (err) => {
+            const message = err instanceof Error ? err.message : 'Failed to add movie'
+            console.error('Error adding movie:', message)
+            setError(`Failed to add movie: ${message}`)
+        }
+    })
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-        const { name, value } = e.target;
+        const { name, value } = e.target
 
         setFormData(prev => ({
             ...prev,
-            [name]: name === 'releaseYear' || name === 'rating'
-                ? parseFloat(value)
-                : value,
-        }));
+            [name]:
+                name === 'releaseYear' || name === 'rating'
+                    ? parseFloat(value)
+                    : value,
+        }))
     }
 
     async function handleSubmit(e: React.FormEvent) {
-        e.preventDefault();
-        setError(null);
-        setSuccess(false);
+        e.preventDefault()
+        setError(null)
+        setSuccess(false)
 
         // Validation
         if (!formData.title.trim() || !formData.director.trim()) {
-            setError('Title and director are required');
-            return;
+            setError('Title and director are required')
+            return
         }
 
         if (formData.rating < 0 || formData.rating > 10) {
-            setError('Rating must be between 0 and 10');
-            return;
+            setError('Rating must be between 0 and 10')
+            return
         }
 
-        try {
-            setLoading(true);
-            const client = getClient();
-
-            // Make POST request to /movies
-            // The chainable API: .movies gives MoviesRequestBuilder
-            // .post(body) sends a POST request with the movie data
-            const newMovie = await client.movies.post(formData);
-
-            if (newMovie) {
-                setSuccess(true);
-                // Reset form
-                setFormData({
-                    title: '',
-                    director: '',
-                    releaseYear: new Date().getFullYear(),
-                    genre: 'Drama',
-                    rating: 7.5,
-                });
-                // Trigger parent component to refresh the movie list
-                onMovieAdded();
-                // Clear success message after 3 seconds
-                setTimeout(() => setSuccess(false), 3000);
-            }
-        } catch (err) {
-            const message = err instanceof Error ? err.message : 'Failed to add movie';
-            console.error('Error adding movie:', message);
-            setError(`Failed to add movie: ${message}`);
-        } finally {
-            setLoading(false);
-        }
+        addMovieMutation.mutate(formData)
     }
 
     return (
@@ -165,10 +173,14 @@ export function AddMovieForm({ onMovieAdded }: AddMovieFormProps) {
                     </div>
                 </div>
 
-                <button type="submit" className="btn-submit" disabled={loading}>
-                    {loading ? 'Adding...' : 'Add Movie'}
+                <button
+                    type="submit"
+                    className="btn-submit"
+                    disabled={addMovieMutation.isPending}
+                >
+                    {addMovieMutation.isPending ? 'Adding...' : 'Add Movie'}
                 </button>
             </form>
         </div>
-    );
+    )
 }

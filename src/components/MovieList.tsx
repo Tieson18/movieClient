@@ -15,7 +15,6 @@ import type { Movie } from '../types'
 interface MovieListProps {
     onMovieDeleted: () => void
     onMovieEdit: (movie: Movie) => void
-    refreshTrigger: number
 }
 
 export function MovieList({ onMovieDeleted, onMovieEdit }: MovieListProps) {
