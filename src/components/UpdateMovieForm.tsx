@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { getClient } from '../api/client';
 import type { Genre, Movie, MovieUpdate } from '../types';
 import '../styles/UpdateMovieForm.css';
@@ -18,6 +19,8 @@ interface UpdateMovieFormProps {
 }
 
 export function UpdateMovieForm({ movie, onMovieUpdated, onCancel }: UpdateMovieFormProps) {
+    const queryClient = useQueryClient();
+
     const [formData, setFormData] = useState<MovieUpdate>(
         movie ? {
             title: movie.title,
@@ -92,12 +95,12 @@ export function UpdateMovieForm({ movie, onMovieUpdated, onCancel }: UpdateMovie
             setLoading(true);
             const client = getClient();
 
-            // Make PATCH request to /movies/{id}
-            // The chainable API: .movies.byId(id) gives MoviesItemRequestBuilder
-            // .patch(body) sends a PATCH request with the update data
             const updatedMovie = await client.movies.byId(currentMovie.id).patch(formData);
 
             if (updatedMovie) {
+                await queryClient.invalidateQueries({ queryKey: ['movies'] });
+                await queryClient.invalidateQueries({ queryKey: ['movieStats'] });
+
                 setSuccess(true);
                 setTimeout(() => {
                     onMovieUpdated();

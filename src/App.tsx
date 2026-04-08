@@ -46,7 +46,7 @@ function App() {
                 <div className="layout">
                     <div className="sidebar">
                         <AddMovieForm onMovieAdded={handleMovieAdded} />
-                        <MovieStats refreshTrigger={refreshTrigger} />
+                        <MovieStats />
                     </div>
 
                     <div className="content">

@@ -14,8 +14,10 @@ function initializeClient(): MovieClient {
     new HttpClient(fetch.bind(globalThis)), // ✅ native fetch, bound correctly
   );
 
-  requestAdapter.baseUrl =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+  // requestAdapter.baseUrl =
+  //   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
+  requestAdapter.baseUrl = "http://localhost:3000";
 
   return createMovieClient(requestAdapter);
 }
