@@ -13,11 +13,9 @@ import '../styles/AddMovieForm.css'
 
 const GENRES: Genre[] = ['Action', 'Drama', 'Comedy', 'Sci-Fi']
 
-interface AddMovieFormProps {
-    onMovieAdded: () => void
-}
 
-export function AddMovieForm({ onMovieAdded }: AddMovieFormProps) {
+
+export function AddMovieForm() {
     const [formData, setFormData] = useState<MovieCreate>({
         title: '',
         director: '',
@@ -54,9 +52,6 @@ export function AddMovieForm({ onMovieAdded }: AddMovieFormProps) {
             })
 
             setTimeout(() => setSuccess(false), 3000)
-
-            // Optional (can remove later)
-            onMovieAdded()
         },
         onError: (err) => {
             const message = err instanceof Error ? err.message : 'Failed to add movie'

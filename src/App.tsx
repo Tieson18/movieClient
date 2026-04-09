@@ -23,14 +23,12 @@ function App() {
             <main className="app-main">
                 <div className="layout">
                     <div className="sidebar">
-                        {/* 🔥 No props needed anymore */}
-                        <AddMovieForm onMovieAdded={() => { }} />
+                        <AddMovieForm />
                         <MovieStats />
                     </div>
 
                     <div className="content">
                         <MovieList
-                            onMovieDeleted={() => { }}
                             onMovieEdit={handleMovieEdit}
                         />
                     </div>

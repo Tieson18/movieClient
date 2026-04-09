@@ -13,11 +13,10 @@ import '../styles/MovieList.css'
 import type { Movie } from '../types'
 
 interface MovieListProps {
-    onMovieDeleted: () => void
     onMovieEdit: (movie: Movie) => void
 }
 
-export function MovieList({ onMovieDeleted, onMovieEdit }: MovieListProps) {
+export function MovieList({ onMovieEdit }: MovieListProps) {
     const { data: movies = [], isLoading, error } = useMovies()
     const queryClient = useQueryClient()
 
@@ -39,7 +38,6 @@ export function MovieList({ onMovieDeleted, onMovieEdit }: MovieListProps) {
             await queryClient.invalidateQueries({ queryKey: ['movieStats'] })
             await queryClient.refetchQueries({ queryKey: ['movieStats'] })
 
-            onMovieDeleted()
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Failed to delete movie'
             alert(`Error deleting movie: ${message}`)
