@@ -1,10 +1,3 @@
-/**
- * Main App Component (Optimized)
- * 
- * Uses React Query for state management and caching.
- * No manual refresh triggers needed.
- */
-
 import { useState } from 'react'
 import { MovieList } from './components/MovieList'
 import { AddMovieForm } from './components/AddMovieForm'
