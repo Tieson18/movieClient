@@ -14,7 +14,8 @@ function initializeClient(): MovieClient {
     new HttpClient(fetch.bind(globalThis)), // ✅ native fetch, bound correctly
   );
 
-  requestAdapter.baseUrl = import.meta.env.VITE_API_BASE_URL;
+  requestAdapter.baseUrl =
+    "https://movie-catalog-api-fwehcpdmh6bggtak.eastus2-01.azurewebsites.net";
 
   return createMovieClient(requestAdapter);
 }

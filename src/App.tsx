@@ -37,7 +37,6 @@ function App() {
 
             <UpdateMovieForm
                 movie={selectedMovie}
-                onMovieUpdated={() => { }}
                 onCancel={() => setSelectedMovie(null)}
             />
         </div>

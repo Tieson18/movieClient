@@ -14,11 +14,10 @@ const GENRES: Genre[] = ['Action', 'Drama', 'Comedy', 'Sci-Fi'];
 
 interface UpdateMovieFormProps {
     movie: Movie | null;
-    onMovieUpdated: () => void;
     onCancel: () => void;
 }
 
-export function UpdateMovieForm({ movie, onMovieUpdated, onCancel }: UpdateMovieFormProps) {
+export function UpdateMovieForm({ movie, onCancel }: UpdateMovieFormProps) {
     const queryClient = useQueryClient();
 
     const [formData, setFormData] = useState<MovieUpdate>(
@@ -103,7 +102,6 @@ export function UpdateMovieForm({ movie, onMovieUpdated, onCancel }: UpdateMovie
 
                 setSuccess(true);
                 setTimeout(() => {
-                    onMovieUpdated();
                     onCancel();
                 }, 1500);
             }
