@@ -16,6 +16,6 @@ export function useMovieStats() {
   return useQuery({
     queryKey: ["movieStats"],
     queryFn: fetchStats,
-    staleTime: 0, // 🔥 longer cache (10 mins)
+    staleTime: 0, // 🔥
   });
 }
