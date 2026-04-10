@@ -15,7 +15,7 @@ function initializeClient(): MovieClient {
   );
 
   requestAdapter.baseUrl =
-    import.meta.env.VITE_API_URL || "http://localhost:3000";
+    "https://movie-catalog-api-fwehcpdmh6bggtak.eastus2-01.azurewebsites.net";
 
   return createMovieClient(requestAdapter);
 }

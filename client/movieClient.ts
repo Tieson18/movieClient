@@ -86,7 +86,7 @@ export function createMovieClient(requestAdapter: RequestAdapter) {
     requestAdapter.baseUrl === ""
   ) {
     requestAdapter.baseUrl =
-      import.meta.env.VITE_API_URL || "http://localhost:3000";
+      "https://movie-catalog-api-fwehcpdmh6bggtak.eastus2-01.azurewebsites.net";
   }
   const pathParameters: Record<string, unknown> = {
     baseurl: requestAdapter.baseUrl,
