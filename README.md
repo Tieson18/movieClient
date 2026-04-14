@@ -5,7 +5,7 @@ A modern React + TypeScript frontend for the Movie API built with the Microsoft 
 ## Project Structure
 
 ```
-webapp/
+movieClient/
 ├── src/
 │   ├── api/
 │   │   └── client.ts              # Kiota client initialization
