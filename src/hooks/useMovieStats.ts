@@ -1,21 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { getClient } from "../api/client";
-import type { Stats } from "../types";
-
-const fetchStats = async (): Promise<Stats | null> => {
-  const client = getClient();
-
-  const response = await client.movies.stats.get();
-
-  if (!response) return null;
-
-  return response as Stats;
-};
+import { fetchMovieStats } from "../api/queries";
+import { movieKeys } from "./useMovies";
 
 export function useMovieStats() {
   return useQuery({
-    queryKey: ["movieStats"],
-    queryFn: fetchStats,
-    staleTime: 0, // 🔥
+    queryKey: movieKeys.stats,
+    queryFn: fetchMovieStats,
+    staleTime: 1000 * 60,
   });
 }

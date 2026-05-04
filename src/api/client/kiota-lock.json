@@ -1,9 +1,9 @@
 {
-  "descriptionHash": "06E3F1CC35F588525E15E72DCA8B02FCDAD43905222C2317B7931AEA7C26E43DE0DF5FDA06B53346FF5D97B95E81A1739F8A639B0CF3292053EBF32FAEC4C3CF",
-  "descriptionLocation": "../movieopenapi.yaml",
+  "descriptionHash": "C64811B73086A3AA0199E29545C70C40AC71B722BDF1EDE5DB71502243D3CFE0EC1EE0372A4DABCEE5409068BB88728F489170FC9675D0F8BF75108EBF51D49E",
+  "descriptionLocation": "../openapi.yaml",
   "lockFileVersion": "1.0.0",
   "kiotaVersion": "1.30.0",
-  "clientClassName": "movieClient",
+  "clientClassName": "MovieClient",
   "typeAccessModifier": "Public",
   "clientNamespaceName": "ApiSdk",
   "language": "TypeScript",

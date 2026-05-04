@@ -1,46 +1,41 @@
-import { useState } from 'react'
-import { MovieList } from './components/MovieList'
-import { AddMovieForm } from './components/AddMovieForm'
-import { MovieStats } from './components/MovieStats'
-import { UpdateMovieForm } from './components/UpdateMovieForm'
-import type { Movie } from './types'
-import './styles/App.css'
+import { Navigate, Route, Routes } from "react-router-dom";
+import { AppNavigation } from "./components/AppNavigation";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { useAuth } from "./context/AuthContext";
+import { LoginPage } from "./pages/LoginPage";
+import { MovieDetailsPage } from "./pages/MovieDetailsPage";
+import { MoviePage } from "./pages/MoviePage";
+import { SignupPage } from "./pages/SignupPage";
+import { WatchlistPage } from "./pages/WatchlistPage";
 
-function App() {
-    const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
-
-    function handleMovieEdit(movie: Movie) {
-        setSelectedMovie(movie)
-    }
-
-    return (
-        <div className="app">
-            <header className="app-header">
-                <h1>🎬 Movie Catalog</h1>
-                <p>Manage your movie collection</p>
-            </header>
-
-            <main className="app-main">
-                <div className="layout">
-                    <div className="sidebar">
-                        <AddMovieForm />
-                        <MovieStats />
-                    </div>
-
-                    <div className="content">
-                        <MovieList
-                            onMovieEdit={handleMovieEdit}
-                        />
-                    </div>
-                </div>
-            </main>
-
-            <UpdateMovieForm
-                movie={selectedMovie}
-                onCancel={() => setSelectedMovie(null)}
-            />
-        </div>
-    )
+function AuthenticatedShell() {
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      <AppNavigation />
+      <Routes>
+        <Route path="/movies" element={<MoviePage />} />
+        <Route path="/movies/:id" element={<MovieDetailsPage />} />
+        <Route path="/watchlist" element={<WatchlistPage />} />
+        <Route path="*" element={<Navigate to="/movies" replace />} />
+      </Routes>
+    </div>
+  );
 }
 
-export default App
+function RootRedirect() {
+  const { isAuthenticated } = useAuth();
+  return <Navigate to={isAuthenticated ? "/movies" : "/login"} replace />;
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<RootRedirect />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/*" element={<AuthenticatedShell />} />
+      </Route>
+    </Routes>
+  );
+}

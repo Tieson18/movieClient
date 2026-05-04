@@ -1,114 +1,92 @@
-/**
- * MovieList Component (Optimized with React Query)
- * 
- * Displays all movies and handles delete operations.
- * Uses caching to avoid unnecessary API requests.
- */
-
-import { useState } from 'react'
-import { getClient } from '../api/client'
-import { useMovies } from '../hooks/useMovies'
-import { useQueryClient } from '@tanstack/react-query'
-import '../styles/MovieList.css'
-import type { Movie } from '../types'
+import { useState } from "react";
+import { useDeleteMovie, useMovies } from "../hooks/useMovies";
+import { MovieCard } from "./MovieCard";
+import type { MovieDetails, UserRole } from "../types";
 
 interface MovieListProps {
-    onMovieEdit: (movie: Movie) => void
+  role: UserRole | null;
+  onMovieEdit?: (movie: MovieDetails) => void;
 }
 
-export function MovieList({ onMovieEdit }: MovieListProps) {
-    const { data: movies = [], isLoading, error } = useMovies()
-    const queryClient = useQueryClient()
+export function MovieList({ role, onMovieEdit }: MovieListProps) {
+  const { data: movies = [], isLoading, error } = useMovies();
+  const deleteMovie = useDeleteMovie();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const isAdmin = role === "admin";
 
-    const [deletingId, setDeletingId] = useState<string | null>(null)
-
-    async function handleDelete(id: string) {
-        if (!confirm('Are you sure you want to delete this movie?')) {
-            return
-        }
-
-        try {
-            setDeletingId(id)
-            const client = getClient()
-
-            await client.movies.byId(id).delete()
-
-            // 🔥 Refresh cached data
-            await queryClient.invalidateQueries({ queryKey: ['movies'] })
-            await queryClient.invalidateQueries({ queryKey: ['movieStats'] })
-            await queryClient.refetchQueries({ queryKey: ['movieStats'] })
-
-        } catch (err) {
-            const message = err instanceof Error ? err.message : 'Failed to delete movie'
-            alert(`Error deleting movie: ${message}`)
-        } finally {
-            setDeletingId(null)
-        }
+  async function handleDelete(id: string) {
+    if (!window.confirm("Are you sure you want to delete this movie?")) {
+      return;
     }
 
-    if (isLoading) {
-        return (
-            <div className="movies-container">
-                <p className="loading">Loading movies...</p>
-            </div>
-        )
+    try {
+      setDeletingId(id);
+      await deleteMovie.mutateAsync(id);
+    } catch (err) {
+      console.error("Error deleting movie", err);
+      const message = err instanceof Error ? err.message : "Failed to delete movie";
+      window.alert(`Error deleting movie: ${message}`);
+    } finally {
+      setDeletingId(null);
     }
+  }
 
-    if (error) {
-        return (
-            <div className="movies-container">
-                <p className="error">Failed to fetch movies</p>
-            </div>
-        )
-    }
-
-    if (movies.length === 0) {
-        return (
-            <div className="movies-container">
-                <p className="empty">No movies found. Add one to get started!</p>
-            </div>
-        )
-    }
-
+  if (isLoading) {
     return (
-        <div className="movies-container">
-            <h2>Movie Catalog ({movies.length})</h2>
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 text-sm text-slate-300">
+        Loading movies...
+      </div>
+    );
+  }
 
-            <div className="movies-grid">
-                {movies.map(movie => (
-                    <div key={movie.id} className="movie-card">
-                        <div className="movie-header">
-                            <h3>{movie.title}</h3>
-                            <span className="genre">{movie.genre}</span>
-                        </div>
+  if (error) {
+    return (
+      <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-6 text-sm text-rose-200">
+        Failed to fetch movies.
+      </div>
+    );
+  }
 
-                        <div className="movie-info">
-                            <p><strong>Director:</strong> {movie.director}</p>
-                            <p><strong>Year:</strong> {movie.releaseYear}</p>
-                            <p><strong>Rating:</strong> {movie.rating.toFixed(1)}/10</p>
-                        </div>
+  if (movies.length === 0) {
+    return (
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 text-sm text-slate-300">
+        No movies found. Add one to get started.
+      </div>
+    );
+  }
 
-                        <div className="movie-actions">
-                            <button
-                                type="button"
-                                className="btn-edit"
-                                onClick={() => onMovieEdit(movie)}
-                            >
-                                Edit
-                            </button>
+  return (
+    <section className="space-y-5">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+        {movies.map((movie) => (
+          <MovieCard
+            key={movie.id}
+            movie={{ ...movie, externalData: movie.externalData ?? null }}
+            footer={
+              isAdmin && onMovieEdit ? (
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-700 px-3 py-2 text-sm font-medium text-slate-200 transition hover:scale-105 hover:border-slate-600 hover:bg-slate-800"
+                    onClick={() => onMovieEdit({ ...movie, externalData: movie.externalData ?? null })}
+                  >
+                    Edit
+                  </button>
 
-                            <button
-                                type="button"
-                                className="btn-delete"
-                                onClick={() => handleDelete(movie.id)}
-                                disabled={deletingId === movie.id}
-                            >
-                                {deletingId === movie.id ? 'Deleting...' : 'Delete'}
-                            </button>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    )
+                  <button
+                    type="button"
+                    className="inline-flex flex-1 items-center justify-center rounded-xl border border-rose-500/40 px-3 py-2 text-sm font-medium text-rose-200 transition hover:scale-105 hover:bg-rose-500/10"
+                    onClick={() => handleDelete(movie.id)}
+                    disabled={deletingId === movie.id}
+                  >
+                    {deletingId === movie.id ? "Deleting..." : "Delete"}
+                  </button>
+                </div>
+              ) : null
+            }
+          />
+        ))}
+      </div>
+    </section>
+  );
 }
