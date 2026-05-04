@@ -62,7 +62,7 @@ export function MovieDetailsPage() {
 
       <section className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
         <aside className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-900/90 shadow-xl shadow-black/20">
-          <div className="aspect-[2/3] bg-slate-800">
+          <div className="aspect-2/3 bg-slate-800">
             {posterUrl ? (
               <img src={posterUrl} alt={`${movie.title} poster`} className="h-full w-full object-cover" />
             ) : (
