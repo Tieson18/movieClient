@@ -1,250 +1,244 @@
-# Movie Catalog React Frontend
+# Movie Client
 
-A modern React + TypeScript frontend for the Movie API built with the Microsoft Kiota client.
+A modern React + TypeScript frontend for the Movie Platform API. Built with Vite, TanStack Query, Tailwind CSS, and a Microsoft Kiota-generated type-safe API client.
 
-## Project Structure
+---
 
-```
-movieClient/
-├── src/
-│   ├── api/
-│   │   └── client.ts              # Kiota client initialization
-│   ├── components/
-│   │   ├── MovieList.tsx          # Display all movies with delete
-│   │   ├── AddMovieForm.tsx       # Form to add new movies
-│   │   ├── MovieStats.tsx         # Display statistics
-│   │   └── UpdateMovieForm.tsx    # Modal form to update movies
-│   ├── styles/
-│   │   ├── index.css              # Global styles
-│   │   ├── App.css                # App layout styles
-│   │   ├── AddMovieForm.css       # Add movie form styles
-│   │   ├── MovieList.css          # Movie list styles
-│   │   ├── MovieStats.css         # Stats display styles
-│   │   └── UpdateMovieForm.css    # Update form modal styles
-│   ├── types.ts                   # TypeScript type definitions
-│   ├── App.tsx                    # Main app component
-│   └── main.tsx                   # React entry point
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-└── index.html
-```
+## Tech Stack
 
-## Setup Instructions
+| Layer | Technology |
+|---|---|
+| Language | TypeScript |
+| Framework | React 19 |
+| Build Tool | Vite 8 |
+| Styling | Tailwind CSS 4 |
+| Routing | React Router v7 |
+| Server State | TanStack React Query v5 |
+| API Client | Microsoft Kiota (generated from OpenAPI spec) |
+| Auth | JWT stored in `localStorage`, injected via patched Kiota adapter |
+| Deployment | Azure Static Web Apps (GitHub Actions) |
 
-### 1. Install Dependencies
+---
+
+## Features
+
+- **Authentication** — login/signup pages with JWT session management via React Context
+- **Protected routes** — unauthenticated users are redirected to `/login`
+- **Movie browsing** — paginated movie list with card view
+- **Movie details** — dedicated detail page with TMDB-enriched data and reviews
+- **Watchlist** — add/remove movies from a personal watchlist
+- **Type-safe API client** — generated from `openapi.yaml` via Microsoft Kiota, with all HTTP calls strongly typed end-to-end
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js v18+
+- The Movie Platform API running and accessible
+
+### Installation
 
 ```bash
-cd webapp
+git clone <your-repo-url>
+cd movieClient
 npm install
 ```
 
-This installs:
-- `react` & `react-dom`: UI framework
-- `@microsoft/kiota-abstractions`: Kiota SDK abstractions
-- `@microsoft/kiota-http-fetchadapter`: HTTP adapter using fetch API
-- `vite`: Build tool and dev server
-- `typescript`: Type safety
+### Environment Variables
 
-### 2. Start Development Server
+Create a `.env` file in the project root:
+
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+For production, point this at your deployed API base URL.
+
+> ⚠️ Never commit secrets to version control. The `.env` file is listed in `.gitignore`.
+
+### Running the Dev Server
 
 ```bash
 npm run dev
 ```
 
-This starts Vite on `http://localhost:5173` with hot module reloading.
+Starts Vite on `http://localhost:5173` with hot module reloading.
 
-### 3. Build for Production
+### Building for Production
 
 ```bash
 npm run build
 ```
 
-This outputs optimized production build to `dist/` folder.
+Outputs an optimized build to `dist/`. Preview it locally with:
 
-## How the Kiota Client Works
+```bash
+npm run preview
+```
+
+---
+
+## Project Structure
+
+```
+movieClient/
+├── index.html
+├── vite.config.ts
+├── tsconfig.json
+├── public/
+│   └── favicon.svg
+└── src/
+    ├── App.tsx                      # Root component, routing shell
+    ├── main.tsx                     # React entry point
+    ├── api/
+    │   ├── client.ts                # Kiota client init + JWT auth patch
+    │   ├── errors.ts                # API error helpers
+    │   ├── mappers.ts               # API response → UI type mappers
+    │   ├── queries.ts               # TanStack Query hooks
+    │   └── client/                  # Generated Kiota client (do not edit manually)
+    │       ├── movieClient.ts
+    │       ├── models/index.ts
+    │       ├── auth/
+    │       ├── movies/
+    │       ├── reviews/
+    │       ├── users/
+    │       └── watchlist/
+    ├── components/
+    │   ├── AppNavigation.tsx
+    │   ├── MovieCard.tsx
+    │   ├── MovieList.tsx
+    │   ├── AddMovieForm.tsx
+    │   ├── UpdateMovieForm.tsx
+    │   ├── ReviewForm.tsx
+    │   ├── MovieStats.tsx
+    │   ├── WatchlistButton.tsx
+    │   ├── ProtectedRoute.tsx
+    │   └── StatusMessage.tsx
+    ├── context/
+    │   └── AuthContext.tsx           # Auth state, login/logout, session persistence
+    ├── hooks/
+    │   ├── useMovies.ts
+    │   ├── useMovieStats.ts
+    │   └── useReviews.ts
+    ├── pages/
+    │   ├── LoginPage.tsx
+    │   ├── SignupPage.tsx
+    │   ├── MoviePage.tsx
+    │   ├── MovieDetailsPage.tsx
+    │   └── WatchlistPage.tsx
+    ├── types/                        # Shared TypeScript types
+    └── utils/
+        └── auth.ts                  # Token/user localStorage helpers
+```
+
+---
+
+## API Client
+
+The API client (`src/api/client/`) is generated from `movieopenapi.yaml` using [Microsoft Kiota](https://github.com/microsoft/kiota). It provides a fluent, fully typed interface for every API endpoint.
+
+> **Do not edit files inside `src/api/client/` by hand.** Regenerate them when the OpenAPI spec changes.
+
+To regenerate:
+
+```bash
+# From the project root (requires Kiota CLI)
+kiota generate -l typescript -d movieopenapi.yaml -c MovieClient -o ./src/api/client
+```
 
 ### Client Architecture
 
-The generated Kiota client provides a fluent, chainable API for accessing your REST endpoints:
-
 ```
-PostsClient (main entry point)
-  └── .movies (MoviesRequestBuilder)
-       ├── .get()           → GET /movies
-       ├── .post(data)      → POST /movies
-       ├── .byId(id)        → /movies/{id} (MoviesItemRequestBuilder)
-       │    ├── .get()      → GET /movies/{id}
-       │    ├── .patch()    → PATCH /movies/{id}
-       │    └── .delete()   → DELETE /movies/{id}
-       └── .stats           → /movies/stats (StatsRequestBuilder)
-            └── .get()      → GET /movies/stats
+MovieClient (entry point)
+  ├── .auth
+  │    ├── .login.post()         → POST /auth/login
+  │    └── .register.post()      → POST /auth/register
+  ├── .movies
+  │    ├── .get()                → GET  /movies
+  │    ├── .post()               → POST /movies
+  │    ├── .stats.get()          → GET  /movies/stats
+  │    └── .byMovieId(id)
+  │         ├── .get()           → GET  /movies/{id}
+  │         ├── .put()           → PUT  /movies/{id}
+  │         ├── .delete()        → DELETE /movies/{id}
+  │         ├── .details.get()   → GET  /movies/{id}/details
+  │         └── .reviews.get()   → GET  /movies/{id}/reviews
+  ├── .reviews
+  │    ├── .post()               → POST /reviews
+  │    └── .byReviewId(id)
+  │         ├── .put()           → PUT  /reviews/{id}
+  │         └── .delete()        → DELETE /reviews/{id}
+  ├── .users.byUserId(id)
+  │    ├── .get()                → GET  /users/{id}
+  │    ├── .put()                → PUT  /users/{id}
+  │    └── .watchlist.get()      → GET  /users/{id}/watchlist
+  └── .watchlist
+       ├── .post()               → POST /watchlist
+       └── .byWatchlistId(id).delete()  → DELETE /watchlist/{id}
 ```
 
-### Request Adapter
+### JWT Authentication
 
-The **FetchRequestAdapter** handles HTTP communication:
+Authentication is handled by patching the Kiota `FetchRequestAdapter` to inject an `Authorization: Bearer <token>` header on every outbound request. The token is read from `localStorage` via `getToken()` in `src/utils/auth.ts`.
 
 ```typescript
-const requestAdapter = new FetchRequestAdapter();
-requestAdapter.baseUrl = 'http://localhost:3000';
+// src/api/client.ts (simplified)
+const adapter = new FetchRequestAdapter(new AnonymousAuthenticationProvider());
+adapter.baseUrl = API_BASE_URL;
+patchAdapter(adapter); // injects JWT header on every call
 ```
 
-It:
-- Uses the browser's `fetch()` API
-- Handles JSON serialization/deserialization
-- Manages request headers and authentication
-- Converts responses to TypeScript objects
+The client is a singleton — initialized once and reused across the app via `getClient()`.
 
-### Client Initialization
+---
 
-See [src/api/client.ts](src/api/client.ts):
+## Routing
 
-```typescript
-function initializeClient(): PostsClient {
-  const requestAdapter = new FetchRequestAdapter();
-  requestAdapter.baseUrl = 'http://localhost:3000';
-  return createPostsClient(requestAdapter);
-}
+```
+/               → redirects to /movies (authenticated) or /login
+/login          → LoginPage
+/signup         → SignupPage
+/movies         → MoviePage          (protected)
+/movies/:id     → MovieDetailsPage   (protected)
+/watchlist      → WatchlistPage      (protected)
 ```
 
-The client is a singleton - it's created once and reused throughout the app.
+All routes under `/movies` and `/watchlist` are wrapped in `<ProtectedRoute />`. Unauthenticated users are automatically redirected to `/login`.
 
-## API Usage Examples
-
-### GET /movies - Fetch All Movies
-
-```typescript
-const client = getClient();
-const response = await client.movies.get();
-// response: MovieCollectionWithNextLink { value: Movie[] }
-```
-
-### POST /movies - Add New Movie
-
-```typescript
-const client = getClient();
-const newMovie = await client.movies.post({
-  title: "Inception",
-  director: "Christopher Nolan",
-  releaseYear: 2010,
-  genre: "Sci-Fi",
-  rating: 8.8
-});
-// Returns: Movie { id, title, director, ... }
-```
-
-### PATCH /movies/{id} - Update Movie
-
-```typescript
-const client = getClient();
-const updated = await client.movies.byId('123').patch({
-  rating: 9.0,
-  title: "Inception (Director's Cut)"
-});
-// Returns: Movie with updated fields
-```
-
-### DELETE /movies/{id} - Delete Movie
-
-```typescript
-const client = getClient();
-const result = await client.movies.byId('123').delete();
-// Returns: { message: "Movie deleted" }
-```
-
-### GET /movies/stats - Get Statistics
-
-```typescript
-const client = getClient();
-const stats = await client.movies.stats.get();
-// Returns: { totalMovies: 5, averageRating: 8.2 }
-```
-
-## Components
-
-### MovieList
-- Displays all movies in a responsive grid
-- Shows title, director, year, genre, and rating
-- Delete button with confirmation
-- Loading and error states
-
-### AddMovieForm
-- Form with validation
-- Genre selection dropdown
-- Rating input (0-10)
-- Success/error notifications
-- Triggers movie list refresh on success
-
-### MovieStats
-- Shows total movie count
-- Shows average rating
-- Sticky positioning for easy access
-- Auto-refreshes with list
-
-### UpdateMovieForm
-- Modal overlay with close button
-- Partial updates (all fields optional)
-- Validation and error handling
-- Success message with auto-close
+---
 
 ## State Management
 
-Uses React Hooks:
-- `useState`: Component-level state (movies, loading, error)
-- `useEffect`: Side effects (fetching data when component mounts)
-- `refreshTrigger`: Simple number that increments to trigger re-fetches
+- **Auth state** — managed by `AuthContext` (`src/context/AuthContext.tsx`). Session data (token, user, role) is persisted to `localStorage` and hydrated on page load.
+- **Server state** — managed by TanStack React Query. Query hooks live in `src/api/queries.ts` and `src/hooks/`.
+- **Local UI state** — component-level `useState` and `useEffect`.
 
-## Error Handling
+---
 
-Each component has:
-- Try-catch blocks around API calls
-- User-friendly error messages
-- Loading states during async operations
-- Disabled buttons during operations
+## Linting
 
-## Type Safety
+```bash
+npm run lint
+```
 
-Full TypeScript support:
-- Generated types from Kiota client
-- Component prop types
-- API response types
-- Form data types
+Uses ESLint with `typescript-eslint`, `eslint-plugin-react-hooks`, and `eslint-plugin-react-refresh`.
 
-## Browser Support
+---
 
-- Modern browsers with ES2020 and fetch API support
-- Chrome, Firefox, Safari, Edge (latest versions)
+## CI/CD
 
-## Development Tips
+A GitHub Actions workflow (`.github/workflows/azure-static-web-apps-*.yml`) builds and deploys the app to **Azure Static Web Apps** on every push to `main`.
 
-1. **Hot Module Reloading**: Changes auto-refresh without losing state
-2. **DevTools**: React DevTools browser extension for debugging
-3. **Network Tab**: Check API calls in browser DevTools
-4. **Console**: TypeScript errors appear in console
-5. **API Health**: Ensure backend is running on `localhost:3000`
+---
 
 ## Troubleshooting
 
-### "Failed to fetch" errors
-- Check backend is running on `localhost:3000`
-- Check for CORS issues in browser console
-- Verify API responses in Network tab
+**"Failed to fetch" errors** — make sure the API is running and `VITE_API_URL` points to the correct host. Check the browser Network tab for CORS errors.
 
-### Client not initialized
-- Check that `getClient()` is called after imports
-- Verify `@microsoft/kiota-*` packages are installed
+**Blank page after login** — verify the API returned a valid JWT and that it's stored correctly in `localStorage`.
 
-### Type errors
-- Run `npm run build` to check TypeScript compilation
-- Check that types.ts is up-to-date with API changes
+**Type errors after API changes** — regenerate the Kiota client from the updated OpenAPI spec, then run `npm run build` to surface any type mismatches.
 
-## Next Steps
-
-1. Add authentication (JWT tokens in request headers)
-2. Add pagination support for large movie lists
-3. Add search/filter functionality
-4. Add sorting options
-5. Add movie details page with more information
-6. Add image uploads for movie posters
-7. Add user reviews/ratings
+**401 on protected routes** — the JWT may be expired. Log out and log back in to obtain a fresh token.
