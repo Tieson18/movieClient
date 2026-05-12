@@ -5,7 +5,7 @@ import { createMovieClient, type MovieClient } from "./client/movieClient";
 import { getToken } from "../utils/auth";
 
 export const API_BASE_URL =
-  "https://movie-platform-api-cnh4hggrdzh4b6f4.eastus2-01.azurewebsites.net/";
+  "https://movie-platform-api-cnh4hggrdzh4b6f4.eastus2-01.azurewebsites.net";
 
 const applyAuthHeader = (requestInfo: RequestInformation) => {
   const token = getToken();
