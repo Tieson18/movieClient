@@ -84,6 +84,7 @@ export function SignupPage() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required
+              minLength={6}
               className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-sky-400"
             />
           </div>

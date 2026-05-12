@@ -1,6 +1,15 @@
 import { getClient } from "./client";
+import type { RegisterUserRequest } from "./client/models/index.js";
 import { toError } from "./errors";
-import { mapAuthResponse, mapMovie, mapMovieDetails, mapReview, mapStats, mapUser, mapWatchlistItem } from "./mappers";
+import {
+  mapAuthResponse,
+  mapMovie,
+  mapMovieDetails,
+  mapReview,
+  mapStats,
+  mapUser,
+  mapWatchlistItem,
+} from "./mappers";
 import type {
   AuthResponse,
   LoginCredentials,
@@ -19,6 +28,16 @@ import type {
 
 const client = () => getClient();
 
+const toRegisterUserRequest = ({
+  name,
+  email,
+  password,
+}: RegisterCredentials): RegisterUserRequest => ({
+  name: name.trim(),
+  email: email.trim(),
+  password,
+});
+
 const throwMappedError = (error: unknown, fallback: string): never => {
   console.error(fallback, error);
   throw toError(error, fallback);
@@ -27,7 +46,9 @@ const throwMappedError = (error: unknown, fallback: string): never => {
 export const fetchMovies = async (): Promise<Movie[]> => {
   try {
     const response = await client().movies.get();
-    return (response?.value ?? []).map(mapMovie).filter((movie): movie is Movie => movie !== null);
+    return (response?.value ?? [])
+      .map(mapMovie)
+      .filter((movie): movie is Movie => movie !== null);
   } catch (error) {
     return throwMappedError(error, "Unable to load movies.");
   }
@@ -46,7 +67,9 @@ export const fetchMovie = async (id: string): Promise<Movie | null> => {
   }
 };
 
-export const fetchMovieDetails = async (id: string): Promise<MovieDetails | null> => {
+export const fetchMovieDetails = async (
+  id: string,
+): Promise<MovieDetails | null> => {
   try {
     if (!id) {
       return null;
@@ -83,7 +106,10 @@ export const createMovie = async (payload: MovieCreate): Promise<Movie> => {
   }
 };
 
-export const updateMovie = async (id: string, payload: MovieUpdate): Promise<Movie> => {
+export const updateMovie = async (
+  id: string,
+  payload: MovieUpdate,
+): Promise<Movie> => {
   try {
     const response = await client().movies.byId(id).patch(payload);
     const movie = mapMovie(response);
@@ -109,7 +135,9 @@ export const deleteMovie = async (id: string): Promise<void> => {
 export const fetchUsers = async (): Promise<User[]> => {
   try {
     const response = await client().users.get();
-    return (response?.value ?? []).map(mapUser).filter((user): user is User => user !== null);
+    return (response?.value ?? [])
+      .map(mapUser)
+      .filter((user): user is User => user !== null);
   } catch (error) {
     return throwMappedError(error, "Unable to load users.");
   }
@@ -128,9 +156,11 @@ export const fetchUser = async (id: string): Promise<User | null> => {
   }
 };
 
-export const registerUser = async (payload: RegisterCredentials): Promise<AuthResponse> => {
+export const registerUser = async (
+  payload: RegisterCredentials,
+): Promise<AuthResponse> => {
   try {
-    const response = await client().auth.register.post(payload);
+    const response = await client().auth.register.post(toRegisterUserRequest(payload));
     const authResponse = mapAuthResponse(response);
 
     if (!authResponse) {
@@ -143,7 +173,9 @@ export const registerUser = async (payload: RegisterCredentials): Promise<AuthRe
   }
 };
 
-export const loginUser = async (payload: LoginCredentials): Promise<AuthResponse> => {
+export const loginUser = async (
+  payload: LoginCredentials,
+): Promise<AuthResponse> => {
   try {
     const response = await client().auth.login.post(payload);
     const authResponse = mapAuthResponse(response);
@@ -165,8 +197,16 @@ export const fetchReviews = async (movieId: string): Promise<Review[]> => {
     }
 
     const reviewResponse = await client().movies.byId(movieId).reviews.get();
-    const reviewItems = (reviewResponse?.value ?? []).filter((review) => review != null);
-    const uniqueUserIds = [...new Set(reviewItems.map((review) => String(review.userId ?? "")).filter(Boolean))];
+    const reviewItems = (reviewResponse?.value ?? []).filter(
+      (review) => review != null,
+    );
+    const uniqueUserIds = [
+      ...new Set(
+        reviewItems
+          .map((review) => String(review.userId ?? ""))
+          .filter(Boolean),
+      ),
+    ];
     const users = await Promise.all(
       uniqueUserIds.map(async (userId) => {
         try {
@@ -177,10 +217,19 @@ export const fetchReviews = async (movieId: string): Promise<Review[]> => {
         }
       }),
     );
-    const usersById = new Map(users.filter((user): user is User => user !== null).map((user) => [user.id, user.name]));
+    const usersById = new Map(
+      users
+        .filter((user): user is User => user !== null)
+        .map((user) => [user.id, user.name]),
+    );
 
     return reviewItems
-      .map((review) => mapReview(review, usersById.get(String(review?.userId ?? "")) ?? "Unknown user"))
+      .map((review) =>
+        mapReview(
+          review,
+          usersById.get(String(review?.userId ?? "")) ?? "Unknown user",
+        ),
+      )
       .filter((review): review is Review => review !== null);
   } catch (error) {
     return throwMappedError(error, "Unable to load reviews.");
@@ -209,7 +258,9 @@ export const addReview = async (payload: ReviewCreate): Promise<Review> => {
   }
 };
 
-export const fetchWatchlist = async (userId: string): Promise<WatchlistItem[]> => {
+export const fetchWatchlist = async (
+  userId: string,
+): Promise<WatchlistItem[]> => {
   try {
     if (!userId) {
       return [];
@@ -222,14 +273,21 @@ export const fetchWatchlist = async (userId: string): Promise<WatchlistItem[]> =
     const moviesById = new Map(movies.map((movie) => [movie.id, movie]));
 
     return (response?.value ?? [])
-      .map((item) => mapWatchlistItem(item, moviesById.get(String(item?.movieId ?? "")) ?? null))
+      .map((item) =>
+        mapWatchlistItem(
+          item,
+          moviesById.get(String(item?.movieId ?? "")) ?? null,
+        ),
+      )
       .filter((item): item is WatchlistItem => item !== null);
   } catch (error) {
     return throwMappedError(error, "Unable to load watchlist.");
   }
 };
 
-export const addToWatchlist = async (payload: WatchlistCreate): Promise<WatchlistItem> => {
+export const addToWatchlist = async (
+  payload: WatchlistCreate,
+): Promise<WatchlistItem> => {
   try {
     const response = await client().watchlist.post(payload);
     const movie = await fetchMovie(payload.movieId);

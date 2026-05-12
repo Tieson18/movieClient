@@ -342,7 +342,6 @@ export function deserializeIntoRegisterUserRequest(registerUserRequest: Partial<
         "email": n => { registerUserRequest.email = n.getStringValue(); },
         "name": n => { registerUserRequest.name = n.getStringValue(); },
         "password": n => { registerUserRequest.password = n.getStringValue(); },
-        "role": n => { registerUserRequest.role = n.getEnumValue<RegisterUserRequest_role>(RegisterUserRequest_roleObject); },
     }
 }
 /**
@@ -578,12 +577,7 @@ export interface RegisterUserRequest extends AdditionalDataHolder, Parsable {
      * The password property
      */
     password?: string | null;
-    /**
-     * The role property
-     */
-    role?: RegisterUserRequest_role | null;
 }
-export type RegisterUserRequest_role = (typeof RegisterUserRequest_roleObject)[keyof typeof RegisterUserRequest_roleObject];
 export interface Review extends AdditionalDataHolder, Parsable {
     /**
      * The comment property
@@ -793,7 +787,6 @@ export function serializeRegisterUserRequest(writer: SerializationWriter, regist
     writer.writeStringValue("email", registerUserRequest.email);
     writer.writeStringValue("name", registerUserRequest.name);
     writer.writeStringValue("password", registerUserRequest.password);
-    writer.writeEnumValue<RegisterUserRequest_role>("role", registerUserRequest.role);
     writer.writeAdditionalData(registerUserRequest.additionalData);
 }
 /**
@@ -971,10 +964,6 @@ export interface WatchlistItem extends AdditionalDataHolder, Parsable {
      */
     userId?: Guid | null;
 }
-export const RegisterUserRequest_roleObject = {
-    User: "user",
-    Admin: "admin",
-} as const;
 export const User_roleObject = {
     User: "user",
     Admin: "admin",
